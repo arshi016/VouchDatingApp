@@ -763,7 +763,7 @@ private struct PreviewGallery: View {
                 Group {
                     Text("Forms").font(TrustTypography.headline)
                     TrustTextField("Email", placeholderKey: "you@trustnight.com", text: $email)
-                    TrustSecureField("Password", placeholderKey: "•••••••", text: $password)
+                    TrustSecureField("Password", placeholderKey: "password", text: $password)
                     TrustMultilineText("Bio", placeholderKey: "Tell us about your mission.", text: $bio)
                     ToggleRow("Enable stealth mode", subtitleKey: "Hide exact activity times.", isOn: $isEnabled)
                     PickerRow("Region", options: regions, selection: $selectedRegion, optionTitle: { $0 })
