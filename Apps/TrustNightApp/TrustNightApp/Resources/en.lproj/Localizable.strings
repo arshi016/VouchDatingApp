@@ -1,0 +1,57 @@
+"hello_trustnight" = "Hello TrustNight";
+"home_title" = "TrustNight";
+"home_subtitle" = "Cybersecurity-themed dating, events, and web-of-trust.";
+"discover_view_events" = "View Events";
+
+"auth_title" = "Sign In";
+"auth_state_signed_in" = "Signed in (mock)";
+"auth_state_signed_out" = "Signed out (mock)";
+"auth_sign_in" = "Sign In";
+
+"consent_title" = "Consent";
+"consent_intro" = "We use biometrics and the camera only for 1:1 liveness checks against your enrollment. You can withdraw consent at any time.";
+"consent_biometrics" = "Allow biometrics for liveness checks";
+"consent_camera" = "Allow camera for verification";
+"consent_continue" = "Continue";
+
+"verification_title" = "Verification";
+"verification_info" = "Liveness checks only match you to your own enrollment. Raw face images are never stored.";
+"verification_enroll" = "Enroll Template";
+"verification_liveness" = "Run Liveness Check";
+"verification_delete_template" = "Delete Template";
+"verification_status" = "Status: %@";
+"verification_status_idle" = "Idle";
+"verification_status_enrolled" = "Enrolled";
+"verification_status_verified" = "Verified";
+
+"events_title" = "Events";
+"region_label" = "Region: %@";
+
+"vouch_title" = "Vouch";
+"vouch_score" = "Trust Score: %d";
+"vouch_recalculate" = "Recalculate";
+
+"trust_profile_title" = "Trust Profile";
+"trust_profile_empty" = "No profile yet";
+"region_unknown" = "Unknown";
+
+"invites_title" = "Invites";
+"invites_subtitle" = "Invite trusted friends to join your network.";
+"invites_send" = "Send Invite";
+
+"chat_title" = "Chat";
+"chat_empty" = "No messages yet.";
+"chat_sent" = "Secure hello sent.";
+"chat_send" = "Send Message";
+
+"safety_title" = "Safety";
+"safety_subtitle" = "Safety tools and guidance will appear here.";
+"safety_open_center" = "Open Safety Center";
+
+"moderation_title" = "Moderation";
+"moderation_subtitle" = "Report harmful behavior and keep TrustNight safe.";
+"moderation_submit" = "Submit Report";
+
+"settings_title" = "Settings";
+"settings_subtitle" = "Manage privacy and security controls.";
+"settings_clear_secure" = "Clear Secure Data";

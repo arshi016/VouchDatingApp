@@ -1,0 +1,57 @@
+"hello_trustnight" = "Hallo TrustNight";
+"home_title" = "TrustNight";
+"home_subtitle" = "Cybersecurity-Dating, Events und Web-of-Trust.";
+"discover_view_events" = "Events ansehen";
+
+"auth_title" = "Anmelden";
+"auth_state_signed_in" = "Angemeldet (Mock)";
+"auth_state_signed_out" = "Abgemeldet (Mock)";
+"auth_sign_in" = "Anmelden";
+
+"consent_title" = "Einwilligung";
+"consent_intro" = "Wir nutzen Biometrics und Kamera nur für 1:1-Liveness-Prüfungen gegen deine eigene Registrierung. Du kannst die Einwilligung jederzeit widerrufen.";
+"consent_biometrics" = "Biometrie für Liveness-Prüfungen erlauben";
+"consent_camera" = "Kamera für Verifikation erlauben";
+"consent_continue" = "Weiter";
+
+"verification_title" = "Verifikation";
+"verification_info" = "Liveness-Prüfungen gleichen dich nur mit deiner eigenen Registrierung ab. Rohbilder werden nicht gespeichert.";
+"verification_enroll" = "Template registrieren";
+"verification_liveness" = "Liveness prüfen";
+"verification_delete_template" = "Template löschen";
+"verification_status" = "Status: %@";
+"verification_status_idle" = "Leerlauf";
+"verification_status_enrolled" = "Registriert";
+"verification_status_verified" = "Verifiziert";
+
+"events_title" = "Events";
+"region_label" = "Region: %@";
+
+"vouch_title" = "Bürgen";
+"vouch_score" = "Trust-Score: %d";
+"vouch_recalculate" = "Neu berechnen";
+
+"trust_profile_title" = "Trust-Profil";
+"trust_profile_empty" = "Noch kein Profil";
+"region_unknown" = "Unbekannt";
+
+"invites_title" = "Einladungen";
+"invites_subtitle" = "Lade vertrauenswürdige Freunde in dein Netzwerk ein.";
+"invites_send" = "Einladung senden";
+
+"chat_title" = "Chat";
+"chat_empty" = "Noch keine Nachrichten.";
+"chat_sent" = "Sichere Nachricht gesendet.";
+"chat_send" = "Nachricht senden";
+
+"safety_title" = "Sicherheit";
+"safety_subtitle" = "Sicherheitstools und Hinweise erscheinen hier.";
+"safety_open_center" = "Sicherheitsbereich öffnen";
+
+"moderation_title" = "Moderation";
+"moderation_subtitle" = "Melde schädliches Verhalten und halte TrustNight sicher.";
+"moderation_submit" = "Meldung senden";
+
+"settings_title" = "Einstellungen";
+"settings_subtitle" = "Privatsphäre- und Sicherheitsoptionen verwalten.";
+"settings_clear_secure" = "Sichere Daten löschen";
