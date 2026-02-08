@@ -158,7 +158,10 @@ let package = Package(
         .testTarget(
             name: "NetworkingTests",
             dependencies: ["Networking"],
-            path: "Tests/NetworkingTests"
+            path: "Tests/NetworkingTests",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "PersistenceTests",

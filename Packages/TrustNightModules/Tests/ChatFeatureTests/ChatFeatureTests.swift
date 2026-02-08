@@ -18,7 +18,7 @@ final class ChatFeatureTests: XCTestCase {
 }
 
 private struct StubAPIClient: APIClient {
-    func request<Response>(_ endpoint: Endpoint<Response>) async throws -> Response where Response : Decodable {
+    func request<Response: Decodable, Body: Encodable>(_ endpoint: Endpoint<Response, Body>) async throws -> Response {
         throw URLError(.badURL)
     }
 }

@@ -50,7 +50,7 @@ public final class AppContainer {
         let featureFlags = InMemoryFeatureFlags()
         let secureStore = KeychainSecureStore(service: "com.trustnight.app")
         let tokenProvider = SecureStoreTokenProvider(secureStore: secureStore, tokenKey: "auth_token")
-        let authInterceptor = BearerAuthInterceptor(tokenProvider: tokenProvider)
+        let tokenRefresher = SecureStoreTokenRefresher(secureStore: secureStore, tokenKey: "auth_token")
         let configuration = NetworkConfiguration(
             baseURL: URL(string: "https://api.trustnight.example")!,
             timeout: 20,
@@ -58,7 +58,8 @@ public final class AppContainer {
         )
         let apiClient = URLSessionAPIClient(
             configuration: configuration,
-            authInterceptor: authInterceptor,
+            tokenProvider: tokenProvider,
+            tokenRefresher: tokenRefresher,
             retryPolicy: .default,
             reachability: AlwaysReachable(),
             logger: logger
@@ -98,6 +99,24 @@ struct SecureStoreTokenProvider: AuthTokenProvider {
     func fetchToken() async -> String? {
         guard let data = try? secureStore.getData(for: tokenKey) else { return nil }
         return String(data: data, encoding: .utf8)
+    }
+}
+
+struct SecureStoreTokenRefresher: AuthTokenRefreshing {
+    private let secureStore: SecureStoring
+    private let tokenKey: String
+
+    init(secureStore: SecureStoring, tokenKey: String) {
+        self.secureStore = secureStore
+        self.tokenKey = tokenKey
+    }
+
+    func refreshToken() async throws -> String {
+        guard let data = try? secureStore.getData(for: tokenKey),
+              let token = String(data: data, encoding: .utf8) else {
+            throw APIError.refreshFailed
+        }
+        return token
     }
 }
 
