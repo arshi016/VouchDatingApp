@@ -25,6 +25,7 @@ public final class AppContainer {
     public let apiClient: APIClient
     public let databaseManager: DatabaseManaging
     public let userProfileRepository: UserProfileRepository
+    public let authService: AuthService
 
     public init(
         logger: Logger,
@@ -33,7 +34,8 @@ public final class AppContainer {
         secureStore: SecureStoring,
         apiClient: APIClient,
         databaseManager: DatabaseManaging,
-        userProfileRepository: UserProfileRepository
+        userProfileRepository: UserProfileRepository,
+        authService: AuthService
     ) {
         self.logger = logger
         self.analytics = analytics
@@ -42,6 +44,7 @@ public final class AppContainer {
         self.apiClient = apiClient
         self.databaseManager = databaseManager
         self.userProfileRepository = userProfileRepository
+        self.authService = authService
     }
 
     public static func live() -> AppContainer {
@@ -49,8 +52,8 @@ public final class AppContainer {
         let analytics = NoopAnalytics()
         let featureFlags = InMemoryFeatureFlags()
         let secureStore = KeychainSecureStore(service: "com.trustnight.app")
-        let tokenProvider = SecureStoreTokenProvider(secureStore: secureStore, tokenKey: "auth_token")
-        let tokenRefresher = SecureStoreTokenRefresher(secureStore: secureStore, tokenKey: "auth_token")
+        let tokenProvider = SecureStoreTokenProvider(secureStore: secureStore, tokenKey: "auth_access_token")
+        let tokenRefresher = SecureStoreTokenRefresher(secureStore: secureStore, tokenKey: "auth_access_token")
         let configuration = NetworkConfiguration(
             baseURL: URL(string: "https://api.trustnight.example")!,
             timeout: 20,
@@ -75,6 +78,16 @@ public final class AppContainer {
 
         let userProfileRepository = GRDBUserProfileRepository(dbManager: databaseManager)
 
+        #if targetEnvironment(simulator)
+        let authService: AuthService = MockAuthService()
+        #else
+        let authService: AuthService = NetworkAuthService(
+            apiClient: apiClient,
+            secureStore: secureStore,
+            logger: logger
+        )
+        #endif
+
         return AppContainer(
             logger: logger,
             analytics: analytics,
@@ -82,7 +95,8 @@ public final class AppContainer {
             secureStore: secureStore,
             apiClient: apiClient,
             databaseManager: databaseManager,
-            userProfileRepository: userProfileRepository
+            userProfileRepository: userProfileRepository,
+            authService: authService
         )
     }
 }
@@ -201,12 +215,24 @@ public struct AppCoordinatorView: View {
             AuthView(
                 viewModel: AuthViewModel(
                     dependencies: AuthDependencies(
-                        apiClient: container.apiClient,
-                        secureStore: container.secureStore,
+                        authService: container.authService,
                         analytics: container.analytics,
-                        logger: container.logger
+                        logger: container.logger,
+                        isMockMode: {
+                            #if targetEnvironment(simulator)
+                            return true
+                            #else
+                            return false
+                            #endif
+                        }()
                     )
-                )
+                ),
+                onAuthenticated: { session in
+                    router.reset()
+                    if session.isNewUser {
+                        router.push(.onboarding)
+                    }
+                }
             )
         case .onboarding:
             OnboardingView(
