@@ -1,0 +1,6 @@
+--swiftversion 5.9
+--indent 4
+--commas inline
+--ifdef no-indent
+--linebreaks lf
+--trimwhitespace always
