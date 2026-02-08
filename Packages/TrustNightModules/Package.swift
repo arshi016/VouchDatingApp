@@ -74,7 +74,7 @@ let package = Package(
         ),
         .target(
             name: "DiscoverFeature",
-            dependencies: ["DesignSystem", "FoundationKit"],
+            dependencies: ["DesignSystem", "FoundationKit", "Networking", "Persistence", "Domain"],
             path: "Sources/Features/DiscoverFeature"
         ),
         .target(
@@ -185,7 +185,7 @@ let package = Package(
         ),
         .testTarget(
             name: "DiscoverFeatureTests",
-            dependencies: ["DiscoverFeature"],
+            dependencies: ["DiscoverFeature", "Domain", "Persistence", "Networking"],
             path: "Tests/DiscoverFeatureTests"
         ),
         .testTarget(

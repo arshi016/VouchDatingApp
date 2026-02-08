@@ -29,6 +29,8 @@ public final class AppContainer {
     public let onboardingPreferencesRepository: OnboardingPreferencesRepository
     public let notificationScheduler: NotificationScheduling
     public let verificationService: VerificationService
+    public let discoverRepository: DiscoverRepository
+    public let waveQuotaRepository: WaveQuotaRepository
 
     public init(
         logger: Logger,
@@ -41,7 +43,9 @@ public final class AppContainer {
         authService: AuthService,
         onboardingPreferencesRepository: OnboardingPreferencesRepository,
         notificationScheduler: NotificationScheduling,
-        verificationService: VerificationService
+        verificationService: VerificationService,
+        discoverRepository: DiscoverRepository,
+        waveQuotaRepository: WaveQuotaRepository
     ) {
         self.logger = logger
         self.analytics = analytics
@@ -54,6 +58,8 @@ public final class AppContainer {
         self.onboardingPreferencesRepository = onboardingPreferencesRepository
         self.notificationScheduler = notificationScheduler
         self.verificationService = verificationService
+        self.discoverRepository = discoverRepository
+        self.waveQuotaRepository = waveQuotaRepository
     }
 
     public static func live() -> AppContainer {
@@ -88,6 +94,8 @@ public final class AppContainer {
         let userProfileRepository = GRDBUserProfileRepository(dbManager: databaseManager)
         let onboardingPreferencesRepository = GRDBOnboardingPreferencesRepository(dbManager: databaseManager)
         let notificationScheduler = LocalNotificationScheduler()
+        let discoverRepository = GRDBDiscoverRepository(dbManager: databaseManager)
+        let waveQuotaRepository = GRDBWaveQuotaRepository(dbManager: databaseManager)
 
         #if targetEnvironment(simulator)
         let authService: AuthService = MockAuthService()
@@ -120,7 +128,9 @@ public final class AppContainer {
             authService: authService,
             onboardingPreferencesRepository: onboardingPreferencesRepository,
             notificationScheduler: notificationScheduler,
-            verificationService: verificationService
+            verificationService: verificationService,
+            discoverRepository: discoverRepository,
+            waveQuotaRepository: waveQuotaRepository
         )
     }
 }
@@ -219,10 +229,14 @@ public struct AppCoordinatorView: View {
             DiscoverView(
                 viewModel: DiscoverViewModel(
                     dependencies: DiscoverDependencies(
+                        apiClient: container.apiClient,
+                        discoverRepository: container.discoverRepository,
+                        waveQuotaRepository: container.waveQuotaRepository,
+                        preferencesRepository: container.onboardingPreferencesRepository,
                         analytics: container.analytics,
                         logger: container.logger
                     ),
-                    onPrimaryAction: { router.push(.events) }
+                    onInvite: { _ in router.push(.events) }
                 )
             )
             .navigationTitle(Text("home_title"))
@@ -298,10 +312,14 @@ public struct AppCoordinatorView: View {
             DiscoverView(
                 viewModel: DiscoverViewModel(
                     dependencies: DiscoverDependencies(
+                        apiClient: container.apiClient,
+                        discoverRepository: container.discoverRepository,
+                        waveQuotaRepository: container.waveQuotaRepository,
+                        preferencesRepository: container.onboardingPreferencesRepository,
                         analytics: container.analytics,
                         logger: container.logger
                     ),
-                    onPrimaryAction: { router.push(.events) }
+                    onInvite: { _ in router.push(.events) }
                 )
             )
         case .events:

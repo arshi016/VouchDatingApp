@@ -85,6 +85,27 @@ public protocol OnboardingPreferencesRepository {
     func clearPreferences() async throws
 }
 
+public struct DiscoverCache: Equatable {
+    public let profiles: [DiscoverProfile]
+    public let lastUpdated: Date?
+
+    public init(profiles: [DiscoverProfile], lastUpdated: Date?) {
+        self.profiles = profiles
+        self.lastUpdated = lastUpdated
+    }
+}
+
+public protocol DiscoverRepository {
+    func fetchCache() async throws -> DiscoverCache
+    func saveProfiles(_ profiles: [DiscoverProfile], updatedAt: Date) async throws
+    func clearProfiles() async throws
+}
+
+public protocol WaveQuotaRepository {
+    func fetchQuota() async throws -> WaveQuota
+    func saveQuota(_ quota: WaveQuota) async throws
+}
+
 public final class GRDBUserRepository: UserRepository {
     private let dbManager: DatabaseManaging
 
@@ -509,6 +530,63 @@ public final class GRDBOnboardingPreferencesRepository: OnboardingPreferencesRep
     public func clearPreferences() async throws {
         try await dbManager.dbQueue.write { db in
             _ = try OnboardingPreferencesRecord.deleteOne(db, key: "primary")
+        }
+    }
+}
+
+public final class GRDBDiscoverRepository: DiscoverRepository {
+    private let dbManager: DatabaseManaging
+
+    public init(dbManager: DatabaseManaging) {
+        self.dbManager = dbManager
+    }
+
+    public func fetchCache() async throws -> DiscoverCache {
+        try await dbManager.dbQueue.read { db in
+            let records = try DiscoverProfileRecord.fetchAll(db)
+            let lastUpdated = records.map(\.updatedAt).max()
+            return DiscoverCache(
+                profiles: records.map { $0.toDomain() },
+                lastUpdated: lastUpdated
+            )
+        }
+    }
+
+    public func saveProfiles(_ profiles: [DiscoverProfile], updatedAt: Date) async throws {
+        try await dbManager.dbQueue.write { db in
+            try DiscoverProfileRecord.deleteAll(db)
+            for profile in profiles {
+                try DiscoverProfileRecord(from: profile, updatedAt: updatedAt).save(db)
+            }
+        }
+    }
+
+    public func clearProfiles() async throws {
+        try await dbManager.dbQueue.write { db in
+            _ = try DiscoverProfileRecord.deleteAll(db)
+        }
+    }
+}
+
+public final class GRDBWaveQuotaRepository: WaveQuotaRepository {
+    private let dbManager: DatabaseManaging
+
+    public init(dbManager: DatabaseManaging) {
+        self.dbManager = dbManager
+    }
+
+    public func fetchQuota() async throws -> WaveQuota {
+        try await dbManager.dbQueue.read { db in
+            if let record = try WaveQuotaRecord.fetchOne(db, key: "daily") {
+                return record.toDomain()
+            }
+            return WaveQuota()
+        }
+    }
+
+    public func saveQuota(_ quota: WaveQuota) async throws {
+        try await dbManager.dbQueue.write { db in
+            try WaveQuotaRecord(quota: quota).save(db)
         }
     }
 }

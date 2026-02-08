@@ -21,6 +21,8 @@ final class PersistenceTests: XCTestCase {
             XCTAssertTrue(db.tableExists("reports"))
             XCTAssertTrue(db.tableExists("blocks"))
             XCTAssertTrue(db.tableExists("onboarding_preferences"))
+            XCTAssertTrue(db.tableExists("discover_profiles"))
+            XCTAssertTrue(db.tableExists("wave_quota"))
         }
     }
 
@@ -149,6 +151,30 @@ final class PersistenceTests: XCTestCase {
         try await onboardingRepo.savePreferences(preferences)
         let fetchedPreferences = try await onboardingRepo.fetchPreferences()
         XCTAssertEqual(fetchedPreferences?.privacy.distanceBucket, .cityArea)
+
+        let discoverRepo = GRDBDiscoverRepository(dbManager: dbManager)
+        let discoverProfile = DiscoverProfile(
+            id: "discover_1",
+            displayName: "Casey",
+            age: 30,
+            distanceBucket: "2-5km",
+            badges: ["Human Verified"],
+            isHumanVerified: true,
+            isIRLVerified: false,
+            intent: .eventsOnly,
+            photoURL: nil,
+            isBlurred: true,
+            summary: "Event organizer"
+        )
+        try await discoverRepo.saveProfiles([discoverProfile], updatedAt: now)
+        let cache = try await discoverRepo.fetchCache()
+        XCTAssertEqual(cache.profiles.count, 1)
+
+        let waveRepo = GRDBWaveQuotaRepository(dbManager: dbManager)
+        let quota = WaveQuota(count: 1, lastReset: now)
+        try await waveRepo.saveQuota(quota)
+        let fetchedQuota = try await waveRepo.fetchQuota()
+        XCTAssertEqual(fetchedQuota.count, 1)
     }
 
     func testStaleWhileRevalidatePolicy() {

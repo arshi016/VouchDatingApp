@@ -179,6 +179,31 @@ public final class DatabaseManager: DatabaseManaging {
             }
         }
 
+        migrator.registerMigration("createDiscoverProfiles") { db in
+            try db.create(table: DiscoverProfileRecord.databaseTableName) { table in
+                table.column("id", .text).primaryKey()
+                table.column("displayName", .text).notNull()
+                table.column("age", .integer).notNull()
+                table.column("distanceBucket", .text).notNull()
+                table.column("badgesJSON", .text).notNull().defaults(to: "[]")
+                table.column("isHumanVerified", .boolean).notNull().defaults(to: false)
+                table.column("isIRLVerified", .boolean).notNull().defaults(to: false)
+                table.column("intent", .text).notNull().defaults(to: "eventsOnly")
+                table.column("photoURL", .text)
+                table.column("isBlurred", .boolean).notNull().defaults(to: false)
+                table.column("summary", .text).notNull()
+                table.column("updatedAt", .datetime).notNull()
+            }
+        }
+
+        migrator.registerMigration("createWaveQuota") { db in
+            try db.create(table: WaveQuotaRecord.databaseTableName) { table in
+                table.column("id", .text).primaryKey()
+                table.column("count", .integer).notNull()
+                table.column("lastReset", .datetime).notNull()
+            }
+        }
+
         return migrator
     }
 

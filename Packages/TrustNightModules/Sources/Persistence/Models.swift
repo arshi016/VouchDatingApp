@@ -659,3 +659,67 @@ struct OnboardingPreferencesRecord: Codable, FetchableRecord, PersistableRecord,
         PersistenceJSON.decode(OnboardingPreferences.self, from: payloadJSON, default: OnboardingPreferences())
     }
 }
+
+struct DiscoverProfileRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
+    static let databaseTableName = "discover_profiles"
+    var id: String
+    var displayName: String
+    var age: Int
+    var distanceBucket: String
+    var badgesJSON: String
+    var isHumanVerified: Bool
+    var isIRLVerified: Bool
+    var intent: String
+    var photoURL: String?
+    var isBlurred: Bool
+    var summary: String
+    var updatedAt: Date
+
+    init(from profile: DiscoverProfile, updatedAt: Date) {
+        id = profile.id
+        displayName = profile.displayName
+        age = profile.age
+        distanceBucket = profile.distanceBucket
+        badgesJSON = PersistenceJSON.encode(profile.badges)
+        isHumanVerified = profile.isHumanVerified
+        isIRLVerified = profile.isIRLVerified
+        intent = profile.intent.rawValue
+        photoURL = profile.photoURL
+        isBlurred = profile.isBlurred
+        summary = profile.summary
+        self.updatedAt = updatedAt
+    }
+
+    func toDomain() -> DiscoverProfile {
+        DiscoverProfile(
+            id: id,
+            displayName: displayName,
+            age: age,
+            distanceBucket: distanceBucket,
+            badges: PersistenceJSON.decode([String].self, from: badgesJSON, default: []),
+            isHumanVerified: isHumanVerified,
+            isIRLVerified: isIRLVerified,
+            intent: IntentMode(rawValue: intent) ?? .eventsOnly,
+            photoURL: photoURL,
+            isBlurred: isBlurred,
+            summary: summary
+        )
+    }
+}
+
+struct WaveQuotaRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
+    static let databaseTableName = "wave_quota"
+    var id: String
+    var count: Int
+    var lastReset: Date
+
+    init(id: String = "daily", quota: WaveQuota) {
+        self.id = id
+        self.count = quota.count
+        self.lastReset = quota.lastReset
+    }
+
+    func toDomain() -> WaveQuota {
+        WaveQuota(count: count, lastReset: lastReset)
+    }
+}

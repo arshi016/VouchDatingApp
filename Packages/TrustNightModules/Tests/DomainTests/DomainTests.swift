@@ -57,4 +57,55 @@ final class DomainTests: XCTestCase {
         let old = Date().addingTimeInterval(-20)
         XCTAssertTrue(policy.requiresReverification(for: .checkIn, lastVerifiedAt: old))
     }
+
+    func testDiscoverFilterEngine() {
+        let profiles = [
+            DiscoverProfile(
+                id: "1",
+                displayName: "A",
+                age: 25,
+                distanceBucket: "2-5km",
+                badges: [],
+                isHumanVerified: true,
+                isIRLVerified: false,
+                intent: .eventsOnly,
+                photoURL: nil,
+                isBlurred: false,
+                summary: "Security analyst"
+            ),
+            DiscoverProfile(
+                id: "2",
+                displayName: "B",
+                age: 42,
+                distanceBucket: "City area",
+                badges: [],
+                isHumanVerified: false,
+                isIRLVerified: false,
+                intent: .relationship,
+                photoURL: nil,
+                isBlurred: true,
+                summary: "Event host"
+            )
+        ]
+
+        let filters = DiscoverFilters(
+            ageRange: AgeRange(min: 21, max: 35),
+            intent: .eventsOnly,
+            humanVerifiedOnly: true,
+            irlVerifiedOnly: false
+        )
+        let engine = DiscoverFilterEngine()
+        let filtered = engine.apply(profiles, filters: filters)
+        XCTAssertEqual(filtered.count, 1)
+        XCTAssertEqual(filtered.first?.id, "1")
+    }
+
+    func testWaveThrottleResetsDaily() {
+        let throttler = WaveThrottler(policy: WaveThrottlePolicy(maxPerDay: 2))
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let quota = WaveQuota(count: 2, lastReset: yesterday)
+        XCTAssertTrue(throttler.canSendWave(quota: quota))
+        let updated = throttler.consume(quota: quota)
+        XCTAssertEqual(updated.count, 1)
+    }
 }
