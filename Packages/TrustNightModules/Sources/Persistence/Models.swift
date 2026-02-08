@@ -68,6 +68,7 @@ public struct EventEntity: Equatable, Codable, Identifiable {
     public var venueHint: String?
     public var hostId: String
     public var capacity: Int
+    public var attendeeCount: Int
     public var createdAt: Date
 
     public init(
@@ -80,6 +81,7 @@ public struct EventEntity: Equatable, Codable, Identifiable {
         venueHint: String? = nil,
         hostId: String,
         capacity: Int,
+        attendeeCount: Int = 0,
         createdAt: Date
     ) {
         self.id = id
@@ -91,6 +93,7 @@ public struct EventEntity: Equatable, Codable, Identifiable {
         self.venueHint = venueHint
         self.hostId = hostId
         self.capacity = capacity
+        self.attendeeCount = attendeeCount
         self.createdAt = createdAt
     }
 }
@@ -122,12 +125,14 @@ public struct EventCheckinEntity: Equatable, Codable, Identifiable {
     public let eventId: String
     public let userId: String
     public var checkedInAt: Date
+    public var metadata: [String: String]
 
-    public init(eventId: String, userId: String, checkedInAt: Date) {
+    public init(eventId: String, userId: String, checkedInAt: Date, metadata: [String: String] = [:]) {
         self.id = "\(eventId):\(userId)"
         self.eventId = eventId
         self.userId = userId
         self.checkedInAt = checkedInAt
+        self.metadata = metadata
     }
 }
 
@@ -362,6 +367,7 @@ struct EventRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
     var venueHint: String?
     var hostId: String
     var capacity: Int
+    var attendeeCount: Int
     var createdAt: Date
 
     init(from entity: EventEntity) {
@@ -374,6 +380,7 @@ struct EventRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
         venueHint = entity.venueHint
         hostId = entity.hostId
         capacity = entity.capacity
+        attendeeCount = entity.attendeeCount
         createdAt = entity.createdAt
     }
 
@@ -388,6 +395,7 @@ struct EventRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
             venueHint: venueHint,
             hostId: hostId,
             capacity: capacity,
+            attendeeCount: attendeeCount,
             createdAt: createdAt
         )
     }
@@ -422,15 +430,22 @@ struct EventCheckinRecord: Codable, FetchableRecord, PersistableRecord, TableRec
     var eventId: String
     var userId: String
     var checkedInAt: Date
+    var metadataJSON: String
 
     init(from entity: EventCheckinEntity) {
         eventId = entity.eventId
         userId = entity.userId
         checkedInAt = entity.checkedInAt
+        metadataJSON = PersistenceJSON.encode(entity.metadata)
     }
 
     func toEntity() -> EventCheckinEntity {
-        EventCheckinEntity(eventId: eventId, userId: userId, checkedInAt: checkedInAt)
+        EventCheckinEntity(
+            eventId: eventId,
+            userId: userId,
+            checkedInAt: checkedInAt,
+            metadata: PersistenceJSON.decode([String: String].self, from: metadataJSON, default: [:])
+        )
     }
 }
 

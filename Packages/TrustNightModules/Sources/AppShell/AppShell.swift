@@ -31,6 +31,9 @@ public final class AppContainer {
     public let verificationService: VerificationService
     public let discoverRepository: DiscoverRepository
     public let waveQuotaRepository: WaveQuotaRepository
+    public let eventRepository: EventRepository
+    public let eventRSVPRepository: EventRSVPRepository
+    public let eventCheckinRepository: EventCheckinRepository
 
     public init(
         logger: Logger,
@@ -45,7 +48,10 @@ public final class AppContainer {
         notificationScheduler: NotificationScheduling,
         verificationService: VerificationService,
         discoverRepository: DiscoverRepository,
-        waveQuotaRepository: WaveQuotaRepository
+        waveQuotaRepository: WaveQuotaRepository,
+        eventRepository: EventRepository,
+        eventRSVPRepository: EventRSVPRepository,
+        eventCheckinRepository: EventCheckinRepository
     ) {
         self.logger = logger
         self.analytics = analytics
@@ -60,6 +66,9 @@ public final class AppContainer {
         self.verificationService = verificationService
         self.discoverRepository = discoverRepository
         self.waveQuotaRepository = waveQuotaRepository
+        self.eventRepository = eventRepository
+        self.eventRSVPRepository = eventRSVPRepository
+        self.eventCheckinRepository = eventCheckinRepository
     }
 
     public static func live() -> AppContainer {
@@ -96,6 +105,9 @@ public final class AppContainer {
         let notificationScheduler = LocalNotificationScheduler()
         let discoverRepository = GRDBDiscoverRepository(dbManager: databaseManager)
         let waveQuotaRepository = GRDBWaveQuotaRepository(dbManager: databaseManager)
+        let eventRepository = GRDBEventRepository(dbManager: databaseManager)
+        let eventRSVPRepository = GRDBEventRSVPRepository(dbManager: databaseManager)
+        let eventCheckinRepository = GRDBEventCheckinRepository(dbManager: databaseManager)
 
         #if targetEnvironment(simulator)
         let authService: AuthService = MockAuthService()
@@ -130,7 +142,10 @@ public final class AppContainer {
             notificationScheduler: notificationScheduler,
             verificationService: verificationService,
             discoverRepository: discoverRepository,
-            waveQuotaRepository: waveQuotaRepository
+            waveQuotaRepository: waveQuotaRepository,
+            eventRepository: eventRepository,
+            eventRSVPRepository: eventRSVPRepository,
+            eventCheckinRepository: eventCheckinRepository
         )
     }
 }
@@ -328,7 +343,11 @@ public struct AppCoordinatorView: View {
                     dependencies: EventsDependencies(
                         apiClient: container.apiClient,
                         analytics: container.analytics,
-                        logger: container.logger
+                        logger: container.logger,
+                        eventRepository: container.eventRepository,
+                        rsvpRepository: container.eventRSVPRepository,
+                        checkinRepository: container.eventCheckinRepository,
+                        currentUserId: "local-user"
                     )
                 )
             )

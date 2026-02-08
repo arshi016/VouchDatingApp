@@ -79,7 +79,7 @@ let package = Package(
         ),
         .target(
             name: "EventsFeature",
-            dependencies: ["DesignSystem", "FoundationKit", "Networking"],
+            dependencies: ["DesignSystem", "FoundationKit", "Networking", "Persistence", "Domain"],
             path: "Sources/Features/EventsFeature"
         ),
         .target(
@@ -190,7 +190,7 @@ let package = Package(
         ),
         .testTarget(
             name: "EventsFeatureTests",
-            dependencies: ["EventsFeature"],
+            dependencies: ["EventsFeature", "Persistence", "Networking"],
             path: "Tests/EventsFeatureTests"
         ),
         .testTarget(

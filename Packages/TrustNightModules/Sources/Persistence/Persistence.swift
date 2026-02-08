@@ -204,6 +204,18 @@ public final class DatabaseManager: DatabaseManaging {
             }
         }
 
+        migrator.registerMigration("addEventAttendeeCount") { db in
+            try db.alter(table: EventRecord.databaseTableName) { table in
+                table.add(column: "attendeeCount", .integer).notNull().defaults(to: 0)
+            }
+        }
+
+        migrator.registerMigration("addCheckinMetadata") { db in
+            try db.alter(table: EventCheckinRecord.databaseTableName) { table in
+                table.add(column: "metadataJSON", .text).notNull().defaults(to: "{}")
+            }
+        }
+
         return migrator
     }
 

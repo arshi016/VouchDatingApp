@@ -108,4 +108,16 @@ final class DomainTests: XCTestCase {
         let updated = throttler.consume(quota: quota)
         XCTAssertEqual(updated.count, 1)
     }
+
+    func testCheckInStateMachine() {
+        var machine = CheckInStateMachine()
+        XCTAssertEqual(machine.state, .idle)
+        _ = machine.handle(.start)
+        XCTAssertEqual(machine.state, .scanning)
+        _ = machine.handle(.tokenScanned("token"))
+        XCTAssertEqual(machine.state, .validating)
+        let now = Date()
+        _ = machine.handle(.validationSuccess(now))
+        XCTAssertEqual(machine.state, .success(now))
+    }
 }
