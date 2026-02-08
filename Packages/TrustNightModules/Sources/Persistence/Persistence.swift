@@ -171,6 +171,14 @@ public final class DatabaseManager: DatabaseManaging {
             try db.createIndex(on: BlockRecord.databaseTableName, columns: ["blockerId"])
         }
 
+        migrator.registerMigration("createOnboardingPreferences") { db in
+            try db.create(table: OnboardingPreferencesRecord.databaseTableName) { table in
+                table.column("id", .text).primaryKey()
+                table.column("payloadJSON", .text).notNull()
+                table.column("updatedAt", .datetime).notNull()
+            }
+        }
+
         return migrator
     }
 

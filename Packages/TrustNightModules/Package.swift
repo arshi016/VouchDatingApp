@@ -64,12 +64,12 @@ let package = Package(
         ),
         .target(
             name: "OnboardingFeature",
-            dependencies: ["DesignSystem", "FoundationKit"],
+            dependencies: ["DesignSystem", "FoundationKit", "Persistence", "Domain"],
             path: "Sources/Features/OnboardingFeature"
         ),
         .target(
             name: "VerificationFeature",
-            dependencies: ["DesignSystem", "FoundationKit", "Domain"],
+            dependencies: ["DesignSystem", "FoundationKit", "Domain", "Networking"],
             path: "Sources/Features/VerificationFeature"
         ),
         .target(
@@ -175,12 +175,12 @@ let package = Package(
         ),
         .testTarget(
             name: "OnboardingFeatureTests",
-            dependencies: ["OnboardingFeature"],
+            dependencies: ["OnboardingFeature", "Persistence", "Domain"],
             path: "Tests/OnboardingFeatureTests"
         ),
         .testTarget(
             name: "VerificationFeatureTests",
-            dependencies: ["VerificationFeature"],
+            dependencies: ["VerificationFeature", "Networking"],
             path: "Tests/VerificationFeatureTests"
         ),
         .testTarget(

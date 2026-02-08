@@ -26,6 +26,9 @@ public final class AppContainer {
     public let databaseManager: DatabaseManaging
     public let userProfileRepository: UserProfileRepository
     public let authService: AuthService
+    public let onboardingPreferencesRepository: OnboardingPreferencesRepository
+    public let notificationScheduler: NotificationScheduling
+    public let verificationService: VerificationService
 
     public init(
         logger: Logger,
@@ -35,7 +38,10 @@ public final class AppContainer {
         apiClient: APIClient,
         databaseManager: DatabaseManaging,
         userProfileRepository: UserProfileRepository,
-        authService: AuthService
+        authService: AuthService,
+        onboardingPreferencesRepository: OnboardingPreferencesRepository,
+        notificationScheduler: NotificationScheduling,
+        verificationService: VerificationService
     ) {
         self.logger = logger
         self.analytics = analytics
@@ -45,6 +51,9 @@ public final class AppContainer {
         self.databaseManager = databaseManager
         self.userProfileRepository = userProfileRepository
         self.authService = authService
+        self.onboardingPreferencesRepository = onboardingPreferencesRepository
+        self.notificationScheduler = notificationScheduler
+        self.verificationService = verificationService
     }
 
     public static func live() -> AppContainer {
@@ -77,11 +86,23 @@ public final class AppContainer {
         }
 
         let userProfileRepository = GRDBUserProfileRepository(dbManager: databaseManager)
+        let onboardingPreferencesRepository = GRDBOnboardingPreferencesRepository(dbManager: databaseManager)
+        let notificationScheduler = LocalNotificationScheduler()
 
         #if targetEnvironment(simulator)
         let authService: AuthService = MockAuthService()
         #else
         let authService: AuthService = NetworkAuthService(
+            apiClient: apiClient,
+            secureStore: secureStore,
+            logger: logger
+        )
+        #endif
+
+        #if targetEnvironment(simulator)
+        let verificationService: VerificationService = MockVerificationService()
+        #else
+        let verificationService: VerificationService = NetworkVerificationService(
             apiClient: apiClient,
             secureStore: secureStore,
             logger: logger
@@ -96,7 +117,10 @@ public final class AppContainer {
             apiClient: apiClient,
             databaseManager: databaseManager,
             userProfileRepository: userProfileRepository,
-            authService: authService
+            authService: authService,
+            onboardingPreferencesRepository: onboardingPreferencesRepository,
+            notificationScheduler: notificationScheduler,
+            verificationService: verificationService
         )
     }
 }
@@ -240,18 +264,35 @@ public struct AppCoordinatorView: View {
                     dependencies: OnboardingDependencies(
                         analytics: container.analytics,
                         logger: container.logger,
-                        secureStore: container.secureStore
+                        preferencesRepository: container.onboardingPreferencesRepository,
+                        permissionClient: SystemPermissionClient(),
+                        notificationScheduler: container.notificationScheduler
                     )
-                )
+                ),
+                onFinished: {
+                    router.reset()
+                    router.push(.verification)
+                }
             )
         case .verification:
+            #if targetEnvironment(simulator)
+            let provider: VerificationProvider = MockVerificationProvider()
+            #else
+            let provider: VerificationProvider = VisionVerificationProvider()
+            #endif
             VerificationView(
                 viewModel: VerificationViewModel(
                     dependencies: VerificationDependencies(
                         analytics: container.analytics,
-                        secureStore: container.secureStore
+                        logger: container.logger,
+                        service: container.verificationService,
+                        provider: provider
                     )
-                )
+                ),
+                onCompleted: {
+                    router.reset()
+                    router.push(.discover)
+                }
             )
         case .discover:
             DiscoverView(

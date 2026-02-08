@@ -1,5 +1,6 @@
 import Foundation
 import GRDB
+import Domain
 
 public struct UserEntity: Equatable, Codable, Identifiable {
     public let id: String
@@ -639,5 +640,22 @@ enum PersistenceJSON {
             return defaultValue
         }
         return value
+    }
+}
+
+struct OnboardingPreferencesRecord: Codable, FetchableRecord, PersistableRecord, TableRecord {
+    static let databaseTableName = "onboarding_preferences"
+    var id: String
+    var payloadJSON: String
+    var updatedAt: Date
+
+    init(id: String = "primary", preferences: OnboardingPreferences, updatedAt: Date) {
+        self.id = id
+        self.payloadJSON = PersistenceJSON.encode(preferences)
+        self.updatedAt = updatedAt
+    }
+
+    func toPreferences() -> OnboardingPreferences {
+        PersistenceJSON.decode(OnboardingPreferences.self, from: payloadJSON, default: OnboardingPreferences())
     }
 }

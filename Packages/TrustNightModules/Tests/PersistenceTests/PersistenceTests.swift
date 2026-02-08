@@ -1,6 +1,7 @@
 import XCTest
 import GRDB
 @testable import Persistence
+import Domain
 
 final class PersistenceTests: XCTestCase {
     func testMigrationsCreateTables() throws {
@@ -19,6 +20,7 @@ final class PersistenceTests: XCTestCase {
             XCTAssertTrue(db.tableExists("messages"))
             XCTAssertTrue(db.tableExists("reports"))
             XCTAssertTrue(db.tableExists("blocks"))
+            XCTAssertTrue(db.tableExists("onboarding_preferences"))
         }
     }
 
@@ -127,6 +129,26 @@ final class PersistenceTests: XCTestCase {
         try await blockRepo.deleteBlock(blockerId: "user_1", blockedId: "user_3")
         let blocksAfterDelete = try await blockRepo.fetchBlocks(blockerId: "user_1")
         XCTAssertEqual(blocksAfterDelete.count, 0)
+
+        let onboardingRepo = GRDBOnboardingPreferencesRepository(dbManager: dbManager)
+        let preferences = OnboardingPreferences(
+            consentCamera: true,
+            consentBiometrics: true,
+            privacy: OnboardingPrivacySettings(
+                discoverVisible: true,
+                distanceBucket: .cityArea,
+                incognitoEventsDefault: false
+            ),
+            permissions: OnboardingPermissions(cameraGranted: true, locationGranted: false, locationSkipped: true),
+            safety: OnboardingSafetySettings(
+                trustedContact: TrustedContact(name: "Alex", phone: "123456"),
+                checkInRemindersEnabled: true
+            ),
+            completedAt: now
+        )
+        try await onboardingRepo.savePreferences(preferences)
+        let fetchedPreferences = try await onboardingRepo.fetchPreferences()
+        XCTAssertEqual(fetchedPreferences?.privacy.distanceBucket, .cityArea)
     }
 
     func testStaleWhileRevalidatePolicy() {

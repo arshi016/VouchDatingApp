@@ -1,5 +1,6 @@
 import Foundation
 import GRDB
+import Domain
 
 public protocol UserRepository {
     func fetchUser(id: String) async throws -> UserEntity?
@@ -76,6 +77,12 @@ public protocol BlockRepository {
     func fetchBlocks(blockerId: String) async throws -> [BlockEntity]
     func upsertBlock(_ block: BlockEntity) async throws
     func deleteBlock(blockerId: String, blockedId: String) async throws
+}
+
+public protocol OnboardingPreferencesRepository {
+    func fetchPreferences() async throws -> OnboardingPreferences?
+    func savePreferences(_ preferences: OnboardingPreferences) async throws
+    func clearPreferences() async throws
 }
 
 public final class GRDBUserRepository: UserRepository {
@@ -475,6 +482,33 @@ public final class GRDBBlockRepository: BlockRepository {
             try BlockRecord
                 .filter(Column("blockerId") == blockerId && Column("blockedId") == blockedId)
                 .deleteAll(db)
+        }
+    }
+}
+
+public final class GRDBOnboardingPreferencesRepository: OnboardingPreferencesRepository {
+    private let dbManager: DatabaseManaging
+
+    public init(dbManager: DatabaseManaging) {
+        self.dbManager = dbManager
+    }
+
+    public func fetchPreferences() async throws -> OnboardingPreferences? {
+        try await dbManager.dbQueue.read { db in
+            try OnboardingPreferencesRecord.fetchOne(db, key: "primary")?.toPreferences()
+        }
+    }
+
+    public func savePreferences(_ preferences: OnboardingPreferences) async throws {
+        let record = OnboardingPreferencesRecord(preferences: preferences, updatedAt: Date())
+        try await dbManager.dbQueue.write { db in
+            try record.save(db)
+        }
+    }
+
+    public func clearPreferences() async throws {
+        try await dbManager.dbQueue.write { db in
+            _ = try OnboardingPreferencesRecord.deleteOne(db, key: "primary")
         }
     }
 }
